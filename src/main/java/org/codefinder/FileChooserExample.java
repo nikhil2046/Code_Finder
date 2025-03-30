@@ -21,6 +21,10 @@ import java.util.*;
 
 public class FileChooserExample {
     public static void main(String[] args) {
+        try {
+            UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName()); // Windows-like UI
+        } catch (Exception ignored) {}
+
         JFrame frame = new JFrame("Missing Code Utility Application");
 
 
