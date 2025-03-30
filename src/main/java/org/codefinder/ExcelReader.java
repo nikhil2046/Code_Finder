@@ -1,8 +1,6 @@
 package org.codefinder;
 
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import java.io.FileInputStream;
@@ -26,8 +24,14 @@ public class ExcelReader {
                         skipFirstRow = false;
                         continue;
                     }
+                    Cell cell = row.getCell(1);
                     if (row.getZeroHeight() || row.getCell(1) == null || row.getCell(1).getStringCellValue().isEmpty()) {
                         continue;
+                    }
+                    CellStyle cellStyle = cell.getCellStyle();
+                    Font font = workbook.getFontAt(cellStyle.getFontIndexAsInt());
+                    if (font.getBold()) {
+                        continue; // **BOLD field ko ignore kar rahe hain**
                     }
                     String fullPath = row.getCell(1).getStringCellValue();
                     //Extract last name after '/'

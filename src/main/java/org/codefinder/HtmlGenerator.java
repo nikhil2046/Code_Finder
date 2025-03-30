@@ -3,8 +3,7 @@ package org.codefinder;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.time.LocalDate;
-import java.time.LocalTime;
-import java.util.Date;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -42,6 +41,9 @@ public class HtmlGenerator {
 
     public static void generateReport2(Map<String, List<String>> data, String fileName) throws IOException {
         FileWriter writer = new FileWriter(fileName);
+        Long totalFields;
+        Long implementedFields;
+        Long nonImplFields;
         writer.write("<html><head><style>");
         writer.write("body { font-family: Calibri, sans-serif; margin: 10px; background-color: #f4f4f4; }");
         writer.write("table { border-collapse: collapse; width: 100%; margin-bottom: 20px; }");
@@ -52,12 +54,25 @@ public class HtmlGenerator {
         writer.write(".green { color: green; }");
         writer.write(".red { color: red; }");
         writer.write("h1 { color: #333; text-align: center; }");
+        writer.write("h4 { color: #334; text-align: center; }");
         //writer.write("footer { text-align: center; padding: 10px; background-color: #4CAF50; color: white; position: fixed; bottom: 0; width: 100%; }");
         writer.write("header { text-align: center; padding: 5px; background-color: orange; color: white; position: fixed; top: 0; width: 100%; }");
         writer.write("</style></head><body>");
         // writer.write("<header>  <h1>Missing Code Utility Report </h1> </header>");
         writer.write("<h1>Missing Code Reports</h1>");
-        writer.write("<h4> Date : "  + LocalDate.now()+"</h4>");
+        writer.write("<table>");
+        writer.write("<tr>");
+        writer.write("<td> <h4>Date : " + LocalDate.now() + "</h4></td>");
+        totalFields = (long) data.entrySet().size();
+        Long notImplCount = 0L;
+        for (List<String> values : data.values()) {
+            notImplCount += Collections.frequency(values, "Not Implemented"); // Direct count
+        }
+        writer.write("<td> <h4>Total Fields : " + totalFields + "</h4></td>");
+        writer.write("<td> <h4> Implemented Fields : " + notImplCount + "</h4></td>");
+        writer.write("<td> <h4>Not Implemented Fields : " +  (totalFields - notImplCount)+ "</h4></td>");
+        writer.write("</tr>");
+        writer.write("</table>");
         writer.write("<table>");
         writer.write("<tr><th>EFX Fields Path</th><th>Status</th><th> File Name Location</th></tr>");
 

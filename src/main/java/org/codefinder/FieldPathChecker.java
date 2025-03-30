@@ -24,6 +24,7 @@ public class FieldPathChecker {
                 String getMethodName = "get" + capitalize(fieldName) + "()";
                 String setMethodName = "set" + capitalize(fieldName) + "()";
                 String isMethodName = "is" + capitalize(fieldName) + "()";
+                String exactFieldName = fieldName;
 
                 List<String> fieldNamesList = new ArrayList<>();
                 //search for method name in all java files
@@ -33,7 +34,7 @@ public class FieldPathChecker {
                             .filter(p -> p.toString().endsWith(".java"))
                             .anyMatch(p -> {
                                 try {
-                                    return searchMethodInFile(p, getMethodName, setMethodName, isMethodName, fieldNamesList);
+                                    return searchMethodInFile(p, getMethodName, setMethodName, isMethodName, exactFieldName, fieldNamesList);
                                 } catch (IOException e) {
                                     throw new RuntimeException(e);
                                 }
@@ -50,18 +51,21 @@ public class FieldPathChecker {
         return map;
     }
 
-    private boolean searchMethodInFile(Path file, String getMethodName, String setMethodName, String isMethodName, List<String> list) throws IOException {
+    private boolean searchMethodInFile(Path file, String getMethodName, String setMethodName, String isMethodName, String exactFieldName, List<String> list) throws IOException {
         try {
             List<String> lines = Files.readAllLines(file);
             for (String line : lines) {
                 if (line.toLowerCase().contains(getMethodName.toLowerCase())
                         || line.toLowerCase().contains(isMethodName)
-                        || line.toLowerCase().contains(setMethodName)) {
+                        || line.toLowerCase().contains(setMethodName)
+                || line.contains(exactFieldName.toLowerCase())) {
+                    System.out.println("Search Field : "+ exactFieldName);
                     list.add(file.getFileName().toString());
                     break;
                 }
             }
         } catch (IOException exception) {
+            System.err.println(exception);
             exception.printStackTrace();
         }
         return false;
