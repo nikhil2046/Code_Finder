@@ -40,6 +40,9 @@ public class HtmlGenerator {
 
 
     public static void generateReport2(Map<String, List<String>> data, String fileName) throws IOException {
+        String button = """
+                <button onclick='exportSelectedToCSV()'>Export Selected to CSV</button>
+                """;
         FileWriter writer = new FileWriter(fileName);
         Long totalFields;
         Long implementedFields;
@@ -70,11 +73,12 @@ public class HtmlGenerator {
         }
         writer.write("<td> <h4>Total Fields : " + totalFields + "</h4></td>");
         writer.write("<td> <h4> Implemented Fields : " + notImplCount + "</h4></td>");
-        writer.write("<td> <h4>Not Implemented Fields : " +  (totalFields - notImplCount)+ "</h4></td>");
+        writer.write("<td> <h4>Not Implemented Fields : " + (totalFields - notImplCount) + "</h4></td>");
         writer.write("</tr>");
         writer.write("</table>");
-        writer.write("<table>");
-        writer.write("<tr><th>EFX Fields Path</th><th>Status</th><th> File Name Location</th></tr>");
+        writer.write(button);
+        /*writer.write("<table id='dataTable'>");
+        writer.write("<tr><th>Select</th><th>EFX Fields Path</th><th>Status</th><th> File Name Location</th></tr>");
 
         if (data.entrySet().isEmpty()) {
             writer.write("<tr><td colspan='3' style='text-align:center; color:red;'>No Record Found</td></tr>");
@@ -84,7 +88,7 @@ public class HtmlGenerator {
                 String status = filenames.get(0).equals("Not Implemented") ? "Not Implemented" : "Implemented";
                 String colorClass = status.equals("Implemented") ? "green" : "red";
 
-                writer.write("<tr><td>" + entry.getKey() + "</td><td class='" + colorClass + "'>" + status + "</td><td>");
+                writer.write("<tr><td><input type='checkbox' class='row-check'></td><td>" + entry.getKey() + "</td><td class='" + colorClass + "'>" + status + "</td><td>");
                 writer.write("<ol class='" + colorClass + "'>");
                 for (String filename : filenames) {
                     if (!filename.equals("Not Implemented")) {
@@ -96,8 +100,79 @@ public class HtmlGenerator {
             writer.write("</td></tr>");
         }
 
+        writer.write("</table>");*/
+        writer.write("<table id='dataTable'>");
+        writer.write("<thead><tr><th>Select</th><th>Serial No</th><th>EFX Fields Path</th><th>Status</th><th>File Name Location</th></tr></thead>");
+        int serialNo = 1;
+        for (Map.Entry<String, List<String>> entry : data.entrySet()) {
+            List<String> filenames = entry.getValue();
+            String status = filenames.get(0).equals("Not Implemented") ? "Not Implemented" : "Implemented";
+            String colorClass = status.equals("Implemented") ? "green" : "red";
+
+            writer.write("<tbody><tr><td><input type='checkbox' class='row-check'></td><td>" + serialNo + "</td><td>" + entry.getKey() + "</td><td class='" + colorClass + "'>" + status + "</td><td>");
+            writer.write("<ol class='" + colorClass + "'>");
+            for (String filename : filenames) {
+                if (!filename.equals("Not Implemented")) {
+                    writer.write("<li>" + filename + "</li>");
+                }
+            }
+            writer.write("</ol>");
+            writer.write("</td></tr></tbody>");
+            serialNo++;
+        }
         writer.write("</table>");
-        // writer.write("<footer>Report generated on " + java.time.LocalDateTime.now() + "</footer>");
+
+
+        String script = """
+                <script>
+                function exportSelectedToCSV() {
+                                 let rows = document.querySelectorAll("#dataTable tbody tr");
+                                 let csv = "Summary,IssueType,Priority,Description,Project\\n";
+                
+                                      // Get the file name based on current page URL
+                                       let fullFileName = window.location.pathname.split('/').pop().split('?')[0];
+                                       let decodedName = decodeURIComponent(fullFileName);
+                                       let words = decodedName.split(/[\\\\s_\\\\-\\\\.]+/);
+                                       let fileName = words[0] + '_' + words[1] + '.csv';
+                
+                                 rows.forEach(row => {
+                                   let checkbox = row.querySelector("input[type='checkbox']");
+                                   if (checkbox.checked) {
+                                     let cells = row.querySelectorAll("td");
+                                     let desc = cells[2].innerText;
+                                     let summaryDesc = `"${desc}" is not implemented.`; // ✅ Uses backticks for template string
+                                     let issueType = `Bug`;
+                                     let priority = `Low`;
+                                     let description = `This field "${desc}" is not implemented in "${fullFileName}"`;
+                                     let project = `TEST`;
+                                     let rowData = [
+                                       summaryDesc,  // Summary
+                                       issueType,
+                                       priority,
+                                       description,
+                                       project
+                
+                
+                                     ];
+                                     csv += rowData.join(",") + "\\n";
+                                   }
+                                 });
+                
+                
+                                 // Download CSV
+                                 let blob = new Blob([csv], { type: "text/csv" });
+                                 let url = window.URL.createObjectURL(blob);
+                                 let a = document.createElement("a");
+                                 a.href = url;
+                                 a.download = fileName;
+                                 a.click();
+                                 window.URL.revokeObjectURL(url);
+                               }
+                </script>
+                """;
+
+
+        writer.write(script);
         writer.write("</body></html>");
         writer.close();
     }

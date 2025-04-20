@@ -27,7 +27,6 @@ public class FileChooserExample {
 
         JFrame frame = new JFrame("Missing Code Utility Application");
 
-
         JPanel mainPanel = new JPanel();
 
         //panel color
